@@ -28,7 +28,17 @@ Many student developers and aspiring entrepreneurs build amazing projects in iso
 
 ---
 
-## 🛠️ Tech Stack
+## �️ Demo Recording
+A full walkthrough of the project is available here:
+
+* [View the recording on Google Drive](https://drive.google.com/file/d/1iSBJk96qHSMpquZJi8AE-lScgPpsz6n9/view?usp=sharing)
+## 🌐 Live Demo
+Try the live deployment here:
+
+* [Foundr on Vercel](https://foundr-amber.vercel.app/)
+---
+
+## �🛠️ Tech Stack
 This project was built with a modern, production-ready stack emphasizing performance and developer experience:
 
 * **Frontend Framework:** React 18 (Functional Components, Custom Hooks)
