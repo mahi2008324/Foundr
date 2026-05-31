@@ -3,9 +3,11 @@
 import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
+  getRedirectResult,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
   signOut,
   updateProfile,
 } from 'firebase/auth'
@@ -27,6 +29,10 @@ import {
 
 const AuthContext = createContext(null)
 const googleProvider = new GoogleAuthProvider()
+
+googleProvider.setCustomParameters({
+  prompt: 'select_account',
+})
 
 async function upsertUserProfile(user, overrides = {}) {
   if (!user) {
@@ -122,7 +128,26 @@ export function AuthProvider({ children }) {
       return googleDemoUser
     }
 
-    const credentials = await signInWithPopup(auth, googleProvider)
+    let credentials
+
+    try {
+      credentials = await signInWithPopup(auth, googleProvider)
+    } catch (error) {
+      const shouldUseRedirect = [
+        'auth/popup-blocked',
+        'auth/popup-closed-by-user',
+        'auth/cancelled-popup-request',
+        'auth/operation-not-supported-in-this-environment',
+      ].includes(error.code)
+
+      if (!shouldUseRedirect) {
+        throw error
+      }
+
+      await signInWithRedirect(auth, googleProvider)
+      return null
+    }
+
     await upsertUserProfile(credentials.user)
     return credentials.user
   }
@@ -183,6 +208,25 @@ export function AuthProvider({ children }) {
     })
 
     return unsubscribe
+  }, [])
+
+  useEffect(() => {
+    if (isMockMode || !auth) {
+      return undefined
+    }
+
+    let mounted = true
+
+    const syncRedirectLogin = async () => {
+      const result = await getRedirectResult(auth)
+      if (mounted && result?.user) {
+        await upsertUserProfile(result.user)
+      }
+    }
+
+    void syncRedirectLogin()
+
+    return () => { mounted = false }
   }, [])
 
   useEffect(() => {

@@ -3,8 +3,6 @@ import { getAuth } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 import { getStorage } from 'firebase/storage'
 
-// db structure: chats / messages / notifications
-
 const requiredEnvKeys = [
   'VITE_FIREBASE_API_KEY',
   'VITE_FIREBASE_AUTH_DOMAIN',
@@ -14,12 +12,20 @@ const requiredEnvKeys = [
   'VITE_FIREBASE_APP_ID',
 ]
 
-const missingEnvKeys = requiredEnvKeys.filter((key) => !import.meta.env[key])
+const missingEnvKeys = requiredEnvKeys.filter(
+  (key) => !import.meta.env[key]
+)
 
 export const firebaseConfigError = missingEnvKeys.length
   ? `Missing Firebase environment variables: ${missingEnvKeys.join(', ')}`
   : ''
-export const isMockMode = Boolean(firebaseConfigError)
+
+export const isMockMode = missingEnvKeys.length > 0
+
+// DEBUG LOGS
+console.log('Firebase Environment Check')
+console.log('Missing Variables:', missingEnvKeys)
+console.log('Mock Mode:', isMockMode)
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,

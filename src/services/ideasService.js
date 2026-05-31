@@ -17,6 +17,7 @@ import {
   writeBatch,
 } from 'firebase/firestore'
 import { db, isMockMode } from './firebase'
+import { createNotification, getNotificationActor } from './notificationsService'
 import {
   generateMockId,
   getRawMockIdeas,
@@ -270,7 +271,7 @@ export async function toggleVote(ideaId, userId) {
 
   const ideaRef = doc(db, 'ideas', ideaId)
 
-  await runTransaction(db, async (transaction) => {
+  const notificationData = await runTransaction(db, async (transaction) => {
     const ideaSnapshot = await transaction.get(ideaRef)
 
     if (!ideaSnapshot.exists()) {
@@ -284,7 +285,30 @@ export async function toggleVote(ideaId, userId) {
       votes: alreadyVoted ? arrayRemove(userId) : arrayUnion(userId),
       updatedAt: serverTimestamp(),
     })
+
+    if (alreadyVoted || ideaSnapshot.data().authorId === userId) {
+      return null
+    }
+
+    return {
+      toUserId: ideaSnapshot.data().authorId,
+      ideaTitle: ideaSnapshot.data().title,
+    }
   })
+
+  if (notificationData) {
+    const actor = await getNotificationActor(userId)
+    await createNotification({
+      toUserId: notificationData.toUserId,
+      fromUserId: userId,
+      fromUserName: actor?.name,
+      fromUserPhoto: actor?.photoURL,
+      type: 'upvote',
+      ideaId,
+      ideaTitle: notificationData.ideaTitle,
+      message: `liked your idea "${notificationData.ideaTitle}"`,
+    })
+  }
 }
 
 export async function toggleBookmark(ideaId, userId) {
@@ -412,15 +436,32 @@ export async function addIdeaComment(ideaId, comment) {
     return
   }
 
+  const ideaRef = doc(db, 'ideas', ideaId)
+  const ideaSnapshot = await getDoc(ideaRef)
+  const idea = ideaSnapshot.exists() ? ideaSnapshot.data() : null
+
   await addDoc(collection(db, 'ideas', ideaId, 'comments'), {
     ...comment,
     createdAt: serverTimestamp(),
   })
 
-  await updateDoc(doc(db, 'ideas', ideaId), {
+  await updateDoc(ideaRef, {
     commentCount: increment(1),
     updatedAt: serverTimestamp(),
   })
+
+  if (idea?.authorId && idea.authorId !== comment.authorId) {
+    await createNotification({
+      toUserId: idea.authorId,
+      fromUserId: comment.authorId,
+      fromUserName: comment.authorName,
+      fromUserPhoto: comment.authorPhoto,
+      type: 'comment',
+      ideaId,
+      ideaTitle: idea.title,
+      message: `commented on your idea "${idea.title}"`,
+    })
+  }
 }
 
 export function subscribeBuildLogs(ideaId, callback) {

@@ -98,7 +98,7 @@ export async function generateChatReply(contactName, contactRole, userMessage) {
 
     const data = await response.json()
     return data.candidates?.[0]?.content?.parts?.[0]?.text ?? randomFallback
-  } catch (err) {
+  } catch {
     return randomFallback
   }
 }

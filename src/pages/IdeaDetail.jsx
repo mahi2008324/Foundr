@@ -191,6 +191,10 @@ export default function IdeaDetail() {
     }
   }, [buildLogForm, buildLogs.length, currentUser, id, validateBuildLog])
 
+  const handleAuthorProfileClick = useCallback(() => {
+    if (idea?.authorId) navigate(`/profile/${idea.authorId}`)
+  }, [idea, navigate])
+
   const handleFeedbackClick = useCallback(async () => {
     if (!idea) return
     // if (idea.aiFeedback) { setAiFeedback(idea.aiFeedback); return }
@@ -305,7 +309,11 @@ export default function IdeaDetail() {
 
               {/* maker info and buttons */}
               <div className="mt-7 flex flex-wrap items-center justify-between gap-4 rounded-2xl p-5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
-                <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleAuthorProfileClick}
+                  className="flex items-center gap-3 rounded-xl text-left transition hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                >
                   {idea.authorPhoto ? (
                     <img src={idea.authorPhoto} alt={idea.authorName} className="h-12 w-12 rounded-xl object-cover ring-2 ring-indigo-500/25" />
                   ) : (
@@ -317,7 +325,7 @@ export default function IdeaDetail() {
                     <p className="font-semibold text-white">{idea.authorName}</p>
                     <p className="text-xs" style={{ color: 'var(--text-muted)' }}>Looking for {idea.lookingFor} · {idea.views ?? 0} views</p>
                   </div>
-                </div>
+                </button>
 
                 <div className="flex flex-wrap gap-2">
                   <button

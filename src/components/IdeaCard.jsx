@@ -28,6 +28,10 @@ function IdeaCard({ idea }) {
     idea.problem?.length > 130 ? `${idea.problem.slice(0, 130).trim()}…` : idea.problem
 
   const handleNavigate = useCallback(() => navigate(`/idea/${idea.id}`), [idea.id, navigate])
+  const handleAuthorClick = useCallback((e) => {
+    e.stopPropagation()
+    if (idea.authorId) navigate(`/profile/${idea.authorId}`)
+  }, [idea.authorId, navigate])
   const handleBookmarkClick = useCallback((e) => { e.stopPropagation(); void handleBookmark(idea.id) }, [handleBookmark, idea.id])
   const handleVoteClick = useCallback((e) => { e.stopPropagation(); void handleVote(idea.id) }, [handleVote, idea.id])
 
@@ -77,7 +81,12 @@ function IdeaCard({ idea }) {
       <p className="mt-2 text-sm leading-6 line-clamp-3" style={{ color: 'var(--text-secondary)' }}>{snippet}</p>
 
       {/* Author */}
-      <div className="mt-5 flex items-center gap-3">
+      <button
+        type="button"
+        onClick={handleAuthorClick}
+        disabled={!idea.authorId}
+        className="mt-5 flex max-w-full items-center gap-3 rounded-xl text-left transition hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 disabled:cursor-default"
+      >
         {idea.authorPhoto ? (
           <img src={idea.authorPhoto} alt={idea.authorName} className="h-9 w-9 rounded-xl object-cover ring-2 ring-indigo-500/20" />
         ) : (
@@ -92,7 +101,7 @@ function IdeaCard({ idea }) {
           <p className="text-sm font-semibold text-white leading-none">{idea.authorName ?? 'Foundr Member'}</p>
           <p className="text-xs mt-0.5 capitalize" style={{ color: 'var(--text-muted)' }}>Looking for {idea.lookingFor ?? 'feedback'}</p>
         </div>
-      </div>
+      </button>
 
       {/* Footer stats */}
       <div

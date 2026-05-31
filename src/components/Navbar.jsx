@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { toast } from 'react-hot-toast'
 import { useAuth } from '../context/AuthContext'
 import { useFeed } from '../context/FeedContext'
+import NotificationBell from './NotificationBell'
 
 const navItems = [
   { to: '/', label: 'Feed', end: true },
@@ -106,20 +107,7 @@ export default function Navbar() {
 
         {/* Right controls */}
         <div className="hidden items-center gap-2 md:flex ml-auto">
-          {/* Notifications stub */}
-          <button
-            type="button"
-            disabled
-            aria-label="Notifications coming soon"
-            className="relative flex h-9 w-9 items-center justify-center rounded-xl transition"
-            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)' }}
-          >
-            <span className="text-base text-slate-500">🔔</span>
-            <span
-              className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold"
-              style={{ background: 'rgba(99,102,241,0.3)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.4)' }}
-            >0</span>
-          </button>
+          <NotificationBell />
 
           {/* Profile link */}
           <NavLink

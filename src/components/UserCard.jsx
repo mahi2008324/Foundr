@@ -1,13 +1,31 @@
 import { memo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { createNotification } from '../services/notificationsService'
 import SkillPill from './SkillPill'
 
 function UserCard({ user }) {
   const navigate = useNavigate()
+  const { currentUser, userProfile } = useAuth()
 
-  const handleConnect = useCallback(() => {
+  const handleConnect = useCallback(async () => {
+    if (currentUser?.uid && user.uid && currentUser.uid !== user.uid) {
+      await createNotification({
+        toUserId: user.uid,
+        fromUserId: currentUser.uid,
+        fromUserName: userProfile?.name || currentUser.displayName || 'Foundr Member',
+        fromUserPhoto: userProfile?.photoURL || currentUser.photoURL || '',
+        type: 'cofounder_request',
+        message: 'sent you a co-founder request',
+      })
+    }
     navigate('/messages', { state: { user } })
-  }, [navigate, user])
+  }, [currentUser, navigate, user, userProfile])
+
+  const handleProfileClick = useCallback(() => {
+    const uid = user.uid || user.id
+    if (uid) navigate(`/profile/${uid}`)
+  }, [navigate, user.id, user.uid])
 
   return (
     <article
@@ -19,20 +37,24 @@ function UserCard({ user }) {
       }}
     >
       <div className="flex items-start gap-4">
-        {user.photoURL ? (
-          <img src={user.photoURL} alt={user.name} className="h-14 w-14 rounded-2xl object-cover ring-2 ring-indigo-500/20 shrink-0" />
-        ) : (
-          <div
-            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-xl font-black text-white"
-            style={{ background: 'linear-gradient(135deg,#6366f1,#7c3aed)' }}
-          >
-            {(user.name ?? 'F').slice(0, 1).toUpperCase()}
-          </div>
-        )}
+        <button type="button" onClick={handleProfileClick} className="shrink-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/40" aria-label={`View ${user.name}'s profile`}>
+          {user.photoURL ? (
+            <img src={user.photoURL} alt={user.name} className="h-14 w-14 rounded-2xl object-cover ring-2 ring-indigo-500/20" />
+          ) : (
+            <div
+              className="flex h-14 w-14 items-center justify-center rounded-2xl text-xl font-black text-white"
+              style={{ background: 'linear-gradient(135deg,#6366f1,#7c3aed)' }}
+            >
+              {(user.name ?? 'F').slice(0, 1).toUpperCase()}
+            </div>
+          )}
+        </button>
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <h3 className="truncate text-lg font-black tracking-tight text-white">{user.name}</h3>
+            <button type="button" onClick={handleProfileClick} className="min-w-0 text-left">
+              <h3 className="truncate text-lg font-black tracking-tight text-white hover:text-indigo-200">{user.name}</h3>
+            </button>
             {user.isVerified && (
               <span
                 className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest shrink-0"

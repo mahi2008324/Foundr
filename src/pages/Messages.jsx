@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../context/AuthContext'
 import { getOrCreateChat, getUserChats, subscribeToMessages, sendMessage } from '../services/messagesService'
@@ -7,6 +7,7 @@ import { getOrCreateChat, getUserChats, subscribeToMessages, sendMessage } from 
 export default function Messages() {
   const { currentUser, userProfile } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const passedUser = location.state?.user
 
   const [chats, setChats] = useState([])
@@ -96,7 +97,11 @@ export default function Messages() {
     if (!chat || !chat.users) return { name: 'Unknown User', role: 'Developer', photoURL: '', skills: [] }
     const otherUid = Object.keys(chat.users).find(uid => uid !== currentUser?.uid)
     if (!otherUid) return { name: 'Myself', role: 'Developer', photoURL: '', skills: [] }
-    return chat.users[otherUid]
+    return { uid: otherUid, ...chat.users[otherUid] }
+  }
+
+  const handleProfileNavigate = (uid) => {
+    if (uid) navigate(`/profile/${uid}`)
   }
 
   const activeChatInfo = chats.find(c => c.id === activeChatId)
@@ -132,16 +137,15 @@ export default function Messages() {
               chats.map(chat => {
                 const companion = getOtherUser(chat)
                 return (
-                  <button
+                  <div
                     key={chat.id}
-                    onClick={() => setActiveChatId(chat.id)}
                     className="w-full flex items-center gap-3 p-3 rounded-2xl transition-all text-left group"
                     style={{
                       background: activeChatId === chat.id ? 'rgba(99,102,241,0.1)' : 'transparent',
                       border: `1px solid ${activeChatId === chat.id ? 'rgba(99,102,241,0.2)' : 'transparent'}`
                     }}
                   >
-                    <div className="relative shrink-0">
+                    <button type="button" onClick={() => handleProfileNavigate(companion.uid)} className="relative shrink-0 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/40">
                       {companion.photoURL ? (
                         <img src={companion.photoURL} alt={companion.name} className="h-12 w-12 rounded-xl object-cover ring-2 ring-indigo-500/20" />
                       ) : (
@@ -152,14 +156,14 @@ export default function Messages() {
                           {(companion.name || 'U')[0].toUpperCase()}
                         </div>
                       )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-white truncate">{companion.name}</p>
+                    </button>
+                    <button type="button" onClick={() => setActiveChatId(chat.id)} className="flex-1 min-w-0 text-left">
+                      <p className="text-sm font-bold text-white truncate hover:text-indigo-200">{companion.name}</p>
                       <p className="text-[11px] truncate mt-0.5 capitalize" style={{ color: activeChatId === chat.id ? '#a5b4fc' : 'var(--text-muted)' }}>
                         {(companion.skills && companion.skills.length > 0) ? companion.skills.slice(0, 3).join(' • ') : (companion.role || 'Connected')}
                       </p>
-                    </div>
-                  </button>
+                    </button>
+                  </div>
                 )
               })
             )}
@@ -178,7 +182,7 @@ export default function Messages() {
                 className="flex items-center justify-between p-5 border-b shrink-0"
                 style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}
               >
-                <div className="flex items-center gap-3">
+                <button type="button" onClick={() => handleProfileNavigate(otherUser.uid)} className="flex items-center gap-3 rounded-xl text-left transition hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-indigo-500/40">
                   {otherUser.photoURL ? (
                      <img src={otherUser.photoURL} alt={otherUser.name} className="h-10 w-10 rounded-xl object-cover ring-2 ring-indigo-500/20" />
                   ) : (
@@ -195,7 +199,7 @@ export default function Messages() {
                       {otherUser.role}
                     </p>
                   </div>
-                </div>
+                </button>
               </header>
 
               {/* message feed */}

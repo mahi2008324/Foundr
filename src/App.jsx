@@ -11,6 +11,7 @@ const Signup = lazy(() => import('./pages/Signup'))
 const IdeaDetail = lazy(() => import('./pages/IdeaDetail'))
 const PostIdea = lazy(() => import('./pages/PostIdea'))
 const Profile = lazy(() => import('./pages/Profile'))
+const PublicProfilePage = lazy(() => import('./pages/PublicProfilePage'))
 const CofounderMatch = lazy(() => import('./pages/CofounderMatch'))
 const Messages = lazy(() => import('./pages/Messages'))
 const Analytics = lazy(() => import('./pages/Analytics'))
@@ -29,7 +30,8 @@ function App() {
         <Route path="/signup" element={renderLazyPage(<PublicOnlyRoute><Signup /></PublicOnlyRoute>)} />
         <Route path="/idea/:id" element={renderLazyPage(<ProtectedRoute><IdeaDetail /></ProtectedRoute>)} />
         <Route path="/post" element={renderLazyPage(<ProtectedRoute><PostIdea /></ProtectedRoute>)} />
-        <Route path="/profile/:uid" element={renderLazyPage(<ProtectedRoute><Profile /></ProtectedRoute>)} />
+        <Route path="/profile/:uid/edit" element={renderLazyPage(<ProtectedRoute><Profile /></ProtectedRoute>)} />
+        <Route path="/profile/:userId" element={renderLazyPage(<ProtectedRoute><PublicProfilePage /></ProtectedRoute>)} />
         <Route path="/match" element={renderLazyPage(<ProtectedRoute><CofounderMatch /></ProtectedRoute>)} />
         <Route path="/messages" element={renderLazyPage(<ProtectedRoute><Messages /></ProtectedRoute>)} />
         <Route path="/analytics/:id" element={renderLazyPage(<ProtectedRoute><Analytics /></ProtectedRoute>)} />

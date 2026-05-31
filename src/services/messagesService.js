@@ -12,6 +12,7 @@ import {
   where
 } from 'firebase/firestore'
 import { db, isMockMode } from './firebase'
+import { createNotification } from './notificationsService'
 
 export async function getOrCreateChat(user1, user2) {
   if (isMockMode || !db) return 'mock_chat_id'
@@ -87,6 +88,12 @@ export function subscribeToMessages(chatId, callback) {
 export async function sendMessage(chatId, senderId, text) {
   if (isMockMode || !db) return
 
+  const chatRef = doc(db, 'chats', chatId)
+  const chatSnap = await getDoc(chatRef)
+  const chat = chatSnap.exists() ? chatSnap.data() : null
+  const recipientId = chat?.participants?.find((uid) => uid !== senderId)
+  const sender = chat?.users?.[senderId]
+
   const msgsRef = collection(db, `chats/${chatId}/messages`)
   await addDoc(msgsRef, {
     senderId,
@@ -95,9 +102,19 @@ export async function sendMessage(chatId, senderId, text) {
   })
 
   // update the list view
-  const chatRef = doc(db, 'chats', chatId)
   await setDoc(chatRef, {
     lastMessage: text,
     lastMessageAt: serverTimestamp(),
   }, { merge: true })
+
+  if (recipientId && sender) {
+    await createNotification({
+      toUserId: recipientId,
+      fromUserId: senderId,
+      fromUserName: sender.name,
+      fromUserPhoto: sender.photoURL,
+      type: 'message',
+      message: 'sent you a message',
+    })
+  }
 }
