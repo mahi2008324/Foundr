@@ -45,6 +45,10 @@ button, input, textarea, select {
   font: inherit;
 }
 
+.notification-bell-button > span:nth-of-type(3) {
+  display: none;
+}
+
 input, textarea, select {
   background: var(--surface-3);
   color: var(--text-primary);

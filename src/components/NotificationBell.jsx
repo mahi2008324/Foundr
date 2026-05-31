@@ -72,9 +72,11 @@ function NotificationBell() {
         onClick={handleToggle}
         aria-label="Notifications"
         aria-expanded={isOpen}
-        className="relative flex h-9 w-9 items-center justify-center rounded-xl transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+        className="notification-bell-button relative flex h-9 w-9 items-center justify-center rounded-xl transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
         style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)' }}
       >
+        <span className="text-base" aria-hidden="true">{'\uD83D\uDD14'}</span>
+        <span className="sr-only">Notifications</span>
         <span className="text-base">🔔</span>
         {unreadCount > 0 && (
           <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-black text-white" style={{ background: '#ef4444', border: '1px solid rgba(255,255,255,0.45)' }}>
