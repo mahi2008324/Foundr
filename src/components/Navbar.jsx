@@ -142,11 +142,14 @@ export default function Navbar() {
           </button>
         </div>
 
-        {/* Mobile toggle */}
+        <div className="ml-auto flex items-center gap-2 md:hidden">
+          <NotificationBell />
+
+          {/* Mobile toggle */}
         <button
           type="button"
           onClick={handleToggle}
-          className="ml-auto flex h-9 w-9 items-center justify-center rounded-xl md:hidden"
+          className="flex h-9 w-9 items-center justify-center rounded-xl"
           style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)' }}
           aria-label="Toggle menu"
           aria-expanded={isOpen}
@@ -157,6 +160,7 @@ export default function Navbar() {
             <span className={`block h-0.5 w-5 rounded transition-all ${isOpen ? '-rotate-45 -translate-y-2 bg-indigo-400' : 'bg-slate-300'}`} />
           </span>
         </button>
+        </div>
       </div>
 
       {/* Mobile menu */}

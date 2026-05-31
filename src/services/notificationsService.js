@@ -6,7 +6,6 @@ import {
   getDocs,
   limit,
   onSnapshot,
-  orderBy,
   query,
   serverTimestamp,
   updateDoc,
@@ -54,17 +53,24 @@ export function subscribeUnreadNotifications(userId, callback, errorCallback) {
     collection(db, 'notifications'),
     where('toUserId', '==', userId),
     where('read', '==', false),
-    orderBy('createdAt', 'desc'),
     limit(25),
   )
 
   return onSnapshot(
     notificationsQuery,
     (snapshot) => {
-      callback(snapshot.docs.map((notificationDoc) => ({
-        id: notificationDoc.id,
-        ...notificationDoc.data(),
-      })))
+      callback(
+        snapshot.docs
+          .map((notificationDoc) => ({
+            id: notificationDoc.id,
+            ...notificationDoc.data(),
+          }))
+          .sort((a, b) => {
+            const aTime = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0
+            const bTime = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0
+            return bTime - aTime
+          }),
+      )
     },
     errorCallback,
   )

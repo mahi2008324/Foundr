@@ -45,7 +45,7 @@ function NotificationBell() {
   const navigate = useNavigate()
   const buttonRef = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
-  const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications()
+  const { notifications, unreadCount, loading, error, markAsRead, markAllAsRead } = useNotifications()
 
   const displayCount = useMemo(() => (unreadCount > 9 ? '9+' : unreadCount.toString()), [unreadCount])
 
@@ -101,7 +101,9 @@ function NotificationBell() {
           </div>
 
           <div className="max-h-96 overflow-y-auto p-2">
-            {loading ? (
+            {error ? (
+              <p className="px-3 py-8 text-center text-sm text-red-300">{error}</p>
+            ) : loading ? (
               <p className="px-3 py-8 text-center text-sm" style={{ color: 'var(--text-muted)' }}>Loading notifications...</p>
             ) : notifications.length === 0 ? (
               <p className="px-3 py-8 text-center text-sm" style={{ color: 'var(--text-muted)' }}>You are all caught up.</p>
